@@ -7,7 +7,7 @@ const Home = () => {
   return (
     <div className="font-sans bg-gray-50">
       
-      {/* 1. HERO SECTION */}
+
       <section className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-[#211F30]">
         <div className="absolute inset-0 z-0 opacity-20" 
              style={{ backgroundImage: 'radial-gradient(#408fc1 1px, transparent 1px)', backgroundSize: '40px 40px' }}>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Scissors, Layers, Box, Check, X, MessageCircle, ArrowRight, Download, PenTool, Layout, Tag, Grid } from 'lucide-react';
+import { Zap, Box, Layers, Tag, Layout, Scissors, MessageCircle, Download, Check, X, Eye, FileText, Maximize2, ExternalLink } from 'lucide-react';
 
 // --- DATOS DE CATEGORÍAS ---
 const laserCategories = [
@@ -9,57 +9,70 @@ const laserCategories = [
     title: 'Llaveros Personalizados',
     desc: 'El souvenir perfecto. Grabamos logotipos, nombres o fechas especiales en MDF, acrílico o madera.',
     features: ['Recuerdos para eventos', 'Merchandising económico', 'Diseños calados o grabados'],
-    img: '/images/laser-llaveros.png',
-    stock: '/images/laser-llaveros.png' 
+    // Puedes agregar MUCHAS imágenes aquí, el diseño ya no se romperá.
+    images: [
+      '/images/laser-llaveros.png', 
+      '/images/laser-extra-1.png', 
+      '/images/laser-extra-2.png',
+      '/images/laser-llaveros2.png', 
+      '/images/laser-extra-4.png',
+      '/images/laser-extra-3.png'
+    ]
   },
   {
     id: 'placas',
     title: 'Placas y Letreros',
     desc: 'Señalética corporativa y trofeos. Acabados elegantes en acrílico y bicapa para oficinas y premiaciones.',
     features: ['Señalética de oficinas', 'Reconocimientos y Trofeos', 'Letreros con luz LED (Neón)'],
-    img: '/images/laser-placas.png',
-    stock: '/images/laser-placas.png'
+    images: [
+      '/images/laser-placas.png', 
+      '/images/laser-extra-5.png', 
+      '/images/laser-placas2.png', 
+      '/images/laser-extra-6.png']
   },
   {
     id: 'nombres',
     title: 'Nombres y Letras 3D',
     desc: 'Decoración para eventos y habitaciones. Letras volumétricas en MDF o poliestireno pintado.',
     features: ['Nombres para Candy Bar', 'Letras gigantes para bodas', 'Decoración infantil'],
-    img: '/images/laser-nombres.png',
-    stock: '/images/laser-nombres2.png'
+    images: [
+      '/images/laser-nombres.png', 
+      '/images/laser-extra-4.png', 
+      '/images/laser-nombres.png', 
+      '/images/laser-extra-4.png']
   },
   {
     id: 'decoracion',
     title: 'Decoración y Hogar',
     desc: 'Cuadros calados, lámparas geométricas y organizadores de escritorio con diseño milimétrico.',
     features: ['Mandalas y Cuadros', 'Lámparas modernas', 'Organizadores y Cajas'],
-    img: '/images/laser-deco.png',
-    stock: '/images/laser-deco2.png'
+    images: [
+      '/images/laser-deco.png',
+      '/images/laser-extra-5.png',
+      '/images/laser-deco.png',
+      '/images/laser-extra-5.png',
+      '/images/laser-deco.png',
+      '/images/laser-extra-5.png',
+      '/images/laser-deco.png',
+      '/images/laser-extra-5.png']
+
   },
   {
     id: 'empresas',
     title: 'Producción para Empresas',
     desc: 'Corte masivo para grandes pedidos. Optimizamos material para reducir costos en tu producción.',
     features: ['Maquila de productos', 'Corte de piezas para ensamble', 'Grabado de marca en productos'],
-    img: '/images/laser-empresas.png',
-    stock: '/images/laser-empresas.png'
+    images: [
+      '/images/laser-empresas.png', 
+      '/images/laser-extra-6.png', 
+      '/images/laser-empresas.png', 
+      '/images/laser-extra-6.png']
   }
-];
-
-// --- IMÁGENES EXTRA PARA LA GALERÍA LATERAL ---
-const extraGalleryImages = [
-  '/images/laser-extra-1.png',
-  '/images/laser-extra-2.png',
-  '/images/laser-extra-3.png',
-  '/images/laser-extra-4.png',
-  '/images/laser-extra-5.png',
-  '/images/laser-extra-6.png',
 ];
 
 const Laser = () => {
   const [activeCategory, setActiveCategory] = useState(laserCategories[0]);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [showGallery, setShowGallery] = useState(false); // Estado para el Panel Lateral
 
   const openWhatsapp = (topic) => {
     const text = `Hola InnovaLab Center, quiero información sobre Corte Láser: ${topic || 'General'}.`;
@@ -67,18 +80,23 @@ const Laser = () => {
   };
 
   return (
-    <div className="font-sans bg-gray-50 min-h-screen relative overflow-x-hidden">
+    <div className="font-sans bg-gray-50 min-h-screen">
+      
+      {/* Estilos para el Scrollbar personalizado */}
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+      `}</style>
 
       {/* --- 1. HERO SECTION --- */}
       <section className="relative pt-36 pb-24 bg-[#1a1825] overflow-hidden">
-        <div className="absolute inset-0 opacity-10" 
-             style={{ backgroundImage: 'radial-gradient(#E29930 1px, transparent 1px)', backgroundSize: '40px 40px' }}>
-        </div>
+        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#E29930 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-orange-500/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-red-500/10 rounded-full blur-[120px] pointer-events-none" />
-        
         <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+          <div>
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-900/30 text-orange-400 text-sm font-bold mb-6 border border-orange-500/30 backdrop-blur-md">
               <Zap size={16} /> Precisión Milimétrica
             </div>
@@ -86,295 +104,193 @@ const Laser = () => {
               Corte y Grabado <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Láser</span>
             </h1>
             <p className="text-gray-400 text-xl max-w-3xl mx-auto leading-relaxed font-light">
-              Desde regalos personalizados únicos hasta producción en serie para empresas. 
-              Corte limpio, grabado detallado y acabados profesionales.
+              Desde regalos personalizados hasta producción industrial. Corte limpio y acabados profesionales.
             </p>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* --- 2. MATERIALES --- */}
-      <section className="py-20 bg-white border-b border-gray-100">
+      <section className="py-16 bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-brand-dark">Materiales que trabajamos</h2>
-            <p className="text-gray-500 mt-2">Nuestras máquinas CO2 pueden cortar y grabar una amplia variedad de superficies.</p>
+          <div className="text-center mb-10">
+            <h2 className="text-2xl font-bold text-brand-dark">Materiales Aptos</h2>
           </div>
-          
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-             <MaterialCard icon={<Box />} title="MDF / Madera" desc="Ideal para maquetas, cajas y decoración rústica." color="text-amber-700" bg="bg-amber-50" />
-             <MaterialCard icon={<Layers />} title="Acrílico" desc="Corte brillante perfecto para letreros y llaveros." color="text-blue-600" bg="bg-blue-50" />
-             <MaterialCard icon={<Tag />} title="Cuero" desc="Grabado de alta calidad para marroquinería." color="text-orange-800" bg="bg-orange-50" />
-             <MaterialCard icon={<Layout />} title="Cartón/Papel" desc="Prototipado rápido y papelería creativa." color="text-gray-600" bg="bg-gray-100" />
+             <MaterialCard icon={<Box />} title="MDF / Madera" desc="Maquetas y decoración." color="text-amber-700" bg="bg-amber-50" />
+             <MaterialCard icon={<Layers />} title="Acrílico" desc="Letreros y llaveros brillantes." color="text-blue-600" bg="bg-blue-50" />
+             <MaterialCard icon={<Tag />} title="Cuero" desc="Grabado para marroquinería." color="text-orange-800" bg="bg-orange-50" />
+             <MaterialCard icon={<Layout />} title="Cartón/Papel" desc="Prototipado rápido." color="text-gray-600" bg="bg-gray-100" />
           </div>
         </div>
       </section>
 
-      {/* --- 3. CATEGORÍAS (SPLIT INTERACTIVO) --- */}
-      <section className="py-24 bg-gray-50">
+      {/* --- 3. GALERÍA PRINCIPAL (FIX: SCROLLABLE) --- */}
+      <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-brand-dark mb-4">Soluciones Láser</h2>
+            <h2 className="text-4xl font-bold text-brand-dark mb-4">Nuestros Productos</h2>
             <div className="h-1 w-20 bg-brand-accent mx-auto"></div>
           </div>
 
-          <div className="grid lg:grid-cols-12 gap-8 items-stretch min-h-[500px]">
-            {/* MENÚ VERTICAL */}
-            <div className="lg:col-span-4 flex flex-col gap-3">
-              {laserCategories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`text-left p-5 rounded-xl transition-all duration-300 border flex items-center justify-between group ${
-                    activeCategory.id === cat.id 
-                      ? 'bg-brand-dark text-white border-brand-dark shadow-lg scale-105 z-10' 
-                      : 'bg-white text-gray-500 border-gray-200 hover:border-brand-accent hover:text-brand-accent'
-                  }`}
-                >
-                  <span className="font-bold text-lg">{cat.title}</span>
-                  {activeCategory.id === cat.id && <Zap size={20} className="text-brand-accent" />}
-                </button>
-              ))}
-              
-              <div className="mt-auto pt-6 hidden lg:block">
-                <p className="text-sm text-gray-400 mb-2">¿Tienes un diseño especial?</p>
+          <div className="grid lg:grid-cols-12 gap-8 items-start">
+            
+            {/* COLUMNA IZQUIERDA: MENÚ (Sticky) */}
+            <div className="lg:col-span-4 sticky top-24 z-10">
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 space-y-2">
+                {laserCategories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setActiveCategory(cat)}
+                    className={`w-full text-left px-5 py-4 rounded-xl transition-all duration-200 flex items-center justify-between group ${
+                      activeCategory.id === cat.id 
+                        ? 'bg-brand-dark text-white shadow-md' 
+                        : 'hover:bg-gray-50 text-gray-600'
+                    }`}
+                  >
+                    <span className="font-bold">{cat.title}</span>
+                    {activeCategory.id === cat.id && <Zap size={18} className="text-brand-accent" />}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-6 bg-orange-50 rounded-2xl p-6 border border-orange-100 hidden lg:block">
+                <h4 className="font-bold text-orange-800 mb-2">¿Diseño Propio?</h4>
+                <p className="text-sm text-orange-700/80 mb-4">Si tienes tu archivo vectorial (.dxf, .ai, .cdr), lo cotizamos al instante.</p>
                 <button 
-                  onClick={() => openWhatsapp('Diseño Personalizado')}
-                  className="w-full py-4 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 font-bold hover:border-brand-accent hover:text-brand-accent transition-colors flex items-center justify-center gap-2"
+                  onClick={() => openWhatsapp('Tengo archivo vectorial')}
+                  className="w-full bg-orange-200 hover:bg-orange-300 text-orange-900 font-bold py-2 rounded-lg text-sm transition-colors"
                 >
-                  <MessageCircle size={20} /> Consultar Diseño
+                  Enviar Archivo
                 </button>
               </div>
             </div>
 
-            {/* VISUALIZACIÓN DINÁMICA */}
+            {/* COLUMNA DERECHA: CONTENIDO Y GALERÍA (FIXED HEIGHT + SCROLL) */}
             <div className="lg:col-span-8">
-              <AnimatePresence mode='wait'>
-                <motion.div
-                  key={activeCategory.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="bg-white rounded-3xl p-2 shadow-2xl h-full flex flex-col md:flex-row overflow-hidden border border-gray-100"
-                >
-                  <div className="md:w-1/2 h-64 md:h-auto relative rounded-2xl overflow-hidden cursor-pointer group"
-                       onClick={() => setSelectedImage(activeCategory.img || activeCategory.stock)}>
-                    <img 
-                      src={activeCategory.img} 
-                      onError={(e) => {e.target.src = activeCategory.stock}}
-                      alt={activeCategory.title} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                    />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
-                    <div className="absolute bottom-4 left-4 bg-white/90 backdrop-blur px-3 py-1 rounded text-xs font-bold text-brand-dark">
-                      Ver detalle
+              <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 h-[700px] flex flex-col">
+                  
+                  {/* Encabezado de Categoría (Fijo) */}
+                  <div className="mb-6 border-b border-gray-100 pb-6 shrink-0">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h3 className="text-3xl font-bold text-brand-dark mb-2">{activeCategory.title}</h3>
+                            <p className="text-gray-600 text-sm">{activeCategory.desc}</p>
+                        </div>
+                        <button 
+                        onClick={() => openWhatsapp(activeCategory.title)}
+                        className="inline-flex items-center justify-center gap-2 bg-brand-accent text-white px-6 py-3 rounded-lg font-bold hover:bg-orange-600 transition-colors shadow-lg shadow-orange-500/20 shrink-0"
+                        >
+                        <Scissors size={18} /> Cotizar
+                        </button>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {activeCategory.features.map((feat, idx) => (
+                        <span key={idx} className="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-bold">
+                          <Check size={12} className="text-brand-accent" /> {feat}
+                        </span>
+                      ))}
                     </div>
                   </div>
 
-                  <div className="md:w-1/2 p-8 flex flex-col justify-center">
-                    <h3 className="text-2xl font-bold text-brand-dark mb-4">{activeCategory.title}</h3>
-                    <p className="text-gray-600 mb-6 leading-relaxed">{activeCategory.desc}</p>
-                    
-                    <div className="bg-orange-50 rounded-xl p-5 mb-8">
-                      <h4 className="text-xs font-bold uppercase text-orange-600 mb-3 tracking-wider">Aplicaciones:</h4>
-                      <ul className="space-y-2">
-                        {activeCategory.features.map((feat, idx) => (
-                          <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
-                            <Check size={16} className="text-orange-500 mt-0.5" /> {feat}
-                          </li>
+                  {/* GRID DE IMÁGENES (SCROLLABLE) */}
+                  {/* Aquí está el cambio: overflow-y-auto y height completa restante */}
+                  <div className="overflow-y-auto custom-scrollbar pr-2 flex-grow">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pb-4">
+                        {activeCategory.images.map((imgSrc, idx) => (
+                        <div 
+                            key={idx}
+                            className="relative group rounded-xl overflow-hidden cursor-pointer h-40 md:h-48 shadow-sm border border-gray-100"
+                            onClick={() => setSelectedImage(imgSrc)}
+                        >
+                            <img 
+                            src={imgSrc} 
+                            alt={`${activeCategory.title} ${idx}`} 
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            onError={(e) => {e.target.src = 'https://via.placeholder.com/400x400?text=Foto+Referencia'}}
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <Eye className="text-white" size={32} />
+                            </div>
+                        </div>
                         ))}
-                      </ul>
                     </div>
-
-                    <button 
-                      onClick={() => openWhatsapp(activeCategory.title)}
-                      className="w-full bg-brand-accent hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
-                    >
-                      <Scissors size={20} /> Cotizar {activeCategory.title}
-                    </button>
+                    <p className="text-center text-gray-400 text-xs mt-2">Mostrando {activeCategory.images.length} imágenes.</p>
                   </div>
-                </motion.div>
-              </AnimatePresence>
+              </div>
             </div>
+
           </div>
         </div>
       </section>
 
-      {/* --- 4. GALERÍA RÁPIDA (CON BOTÓN DESPLEGABLE) --- */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex justify-between items-end mb-8">
-            <h2 className="text-2xl font-bold text-brand-dark">Trabajos Recientes</h2>
-            {/* BOTÓN QUE ABRE EL PANEL LATERAL */}
-            <button 
-              onClick={() => setShowGallery(true)} 
-              className="text-brand-accent font-bold hover:underline flex items-center gap-2 group"
-            >
-              <Grid size={18} />
-              Ver más fotos
-              <ArrowRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-             {laserCategories.slice(0, 4).map((cat, idx) => (
-               <div key={idx} className="rounded-xl overflow-hidden h-48 cursor-pointer group shadow-sm border border-gray-100" onClick={() => setSelectedImage(cat.img || cat.stock)}>
-                 <img src={cat.img} onError={(e) => {e.target.src = cat.stock}} alt={cat.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-               </div>
-             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* --- 5. CATÁLOGO PDF --- */}
-      <section className="py-20 px-6 bg-gray-50">
-        <div className="max-w-5xl mx-auto bg-gradient-to-r from-orange-900 to-amber-700 rounded-3xl overflow-hidden shadow-2xl relative">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500/20 rounded-full blur-3xl -mr-20 -mt-20"></div>
-          
-          <div className="relative z-10 grid md:grid-cols-2 gap-10 p-10 md:p-16 items-center">
+      {/* --- 4. SECCIÓN PDF PREMIUM --- */}
+      <section className="py-20 px-6 bg-gray-50 border-t border-gray-200">
+        <div className="max-w-7xl mx-auto bg-[#1a1825] rounded-[2.5rem] p-10 md:p-16 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-orange-500/10 rounded-full blur-[150px] pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-red-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+          <div className="grid lg:grid-cols-2 gap-16 items-center relative z-10">
             <div>
-              <div className="inline-block bg-white text-orange-800 text-xs font-bold px-3 py-1 rounded-full mb-4">
-                CATÁLOGO DE PRODUCTOS
+              <div className="inline-block bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full mb-6">RECURSO GRATUITO</div>
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight">Catálogo de Productos <br/> <span className="text-orange-500">Láser 2025</span></h2>
+              <p className="text-gray-400 text-lg mb-8 leading-relaxed">Descubre nuestra colección completa de merchandising, trofeos y decoración.</p>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <a href="/catalogo_laser.pdf" download="Catalogo_Laser_InnovaLab" className="flex items-center justify-center gap-3 bg-white text-brand-dark font-bold py-4 px-8 rounded-xl hover:bg-gray-100 transition-all shadow-lg hover:-translate-y-1">
+                  <Download size={22} className="text-orange-600" /> Descargar PDF
+                </a>
+                <a href="/catalogo_laser.pdf" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3 border border-gray-600 text-gray-300 font-bold py-4 px-8 rounded-xl hover:border-white hover:text-white transition-all">
+                  <ExternalLink size={22} /> Ver Online
+                </a>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
-                Regalos & <br/>Merchandising
-              </h2>
-              <p className="text-orange-100 mb-8 text-lg">
-                Descarga nuestro catálogo de productos láser: Llaveros, trofeos, cajas de vino y decoración. Precios al por mayor y menor.
-              </p>
-              
-              <a 
-                href="/catalogo_laser.pdf"
-                download="Catalogo_Laser_InnovaLab"
-                className="inline-flex items-center gap-3 bg-brand-accent text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:bg-white hover:text-brand-accent transition-all transform hover:-translate-y-1"
-              >
-                <Download size={24} />
-                Descargar PDF
-              </a>
             </div>
-
-            <div className="flex justify-center md:justify-end">
-              <div className="relative w-48 h-64 bg-white rounded-lg shadow-2xl transform -rotate-2 hover:rotate-0 transition-transform duration-500 flex flex-col items-center justify-center border border-gray-200">
-                <PenTool size={48} className="text-brand-accent mb-4" />
-                <h3 className="text-brand-dark font-bold text-lg text-center px-4">CORTE LÁSER</h3>
-                <p className="text-gray-400 text-xs text-center">Catálogo 2025</p>
+            <div className="relative group">
+              <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-2 shadow-2xl border border-gray-700 transform group-hover:scale-[1.02] transition-transform duration-500">
+                <div className="bg-gray-900 rounded-t-xl px-4 py-3 flex items-center gap-2 border-b border-gray-700">
+                  <div className="flex gap-1.5"><div className="w-3 h-3 rounded-full bg-red-500/80"></div><div className="w-3 h-3 rounded-full bg-yellow-500/80"></div><div className="w-3 h-3 rounded-full bg-green-500/80"></div></div>
+                  <div className="ml-4 bg-gray-800 px-3 py-1 rounded text-xs text-gray-400 flex items-center gap-2 w-full max-w-[200px]"><FileText size={10} /> catalogo_laser_2025.pdf</div>
+                </div>
+                <div className="bg-white h-[400px] w-full rounded-b-xl overflow-hidden relative">
+                   <iframe src="/catalogo_laser.pdf#toolbar=0" title="Visor Catálogo" className="w-full h-full">
+                      <div className="flex flex-col items-center justify-center h-full text-gray-500"><FileText size={48} className="mb-2" /><p>Tu navegador no soporta la previsualización.</p></div>
+                   </iframe>
+                   <a href="/catalogo_laser.pdf" target="_blank" className="absolute bottom-4 right-4 bg-black/80 text-white p-2 rounded-lg hover:bg-orange-500 transition-colors backdrop-blur-sm" title="Ver pantalla completa"><Maximize2 size={20} /></a>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* --- 6. CONTACTO FINAL --- */}
-      <section className="py-24 bg-brand-dark relative overflow-hidden text-center">
-         <div className="absolute top-0 left-0 w-full h-full opacity-10" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+      {/* --- 5. CONTACTO FINAL (FULL WIDTH) --- */}
+      <section className="py-24 bg-[#1a1825] relative overflow-hidden text-center border-t border-gray-800">
+         <div className="absolute top-0 left-0 w-full h-full opacity-10" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
          <div className="absolute right-0 top-0 w-[500px] h-[500px] bg-orange-500/20 rounded-full blur-[100px] pointer-events-none"></div>
-
          <div className="relative z-10 max-w-4xl mx-auto px-6">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">¿Producción Urgente?</h2>
-            <p className="text-gray-300 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
-               Atendemos pedidos corporativos y urgencias. Cuéntanos tu proyecto y te cotizamos al instante.
-            </p>
-            <a 
-              href="https://wa.me/51987564941?text=Hola%20InnovaLab%20Center,%20quiero%20información%20sobre%20Corte%20Láser."
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-3 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-5 px-12 rounded-full shadow-2xl shadow-green-900/30 transition-all hover:scale-105"
-            >
-              <MessageCircle size={28} />
-              Solicitar Cotización
+            <p className="text-gray-300 text-lg md:text-xl mb-10 max-w-2xl mx-auto">Atendemos pedidos corporativos y urgencias. Cuéntanos tu proyecto y te cotizamos al instante.</p>
+            <a href="https://wa.me/51987564941?text=Hola%20InnovaLab%20Center,%20quiero%20información%20sobre%20Corte%20Láser." target="_blank" rel="noreferrer" className="inline-flex items-center gap-3 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-5 px-12 rounded-full shadow-2xl shadow-green-900/30 transition-all hover:scale-105">
+              <MessageCircle size={28} /> Solicitar Cotización
             </a>
          </div>
       </section>
 
-      {/* --- PANEL LATERAL DE GALERÍA (DRAWER) --- */}
-      <AnimatePresence>
-        {showGallery && (
-          <>
-            {/* Backdrop oscuro */}
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-sm"
-              onClick={() => setShowGallery(false)}
-            />
-            {/* Panel Deslizante desde la derecha */}
-            <motion.div 
-              initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-0 right-0 h-full w-full md:w-[500px] bg-white z-[70] shadow-2xl overflow-y-auto"
-            >
-              <div className="p-6">
-                <div className="flex justify-between items-center mb-8">
-                  <h3 className="text-2xl font-bold text-brand-dark">Galería Extendida</h3>
-                  <button 
-                    onClick={() => setShowGallery(false)}
-                    className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-                  >
-                    <X size={24} className="text-gray-600" />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  {extraGalleryImages.map((imgSrc, idx) => (
-                    <div 
-                      key={idx} 
-                      className="rounded-xl overflow-hidden h-40 cursor-pointer shadow-md hover:shadow-lg transition-shadow border border-gray-100 group"
-                      onClick={() => { setSelectedImage(imgSrc); setShowGallery(false); }} // Cierra el panel y abre el zoom
-                    >
-                      <img 
-                        src={imgSrc} 
-                        alt={`Galería Extra ${idx}`} 
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                        onError={(e) => {e.target.src = 'https://via.placeholder.com/300?text=Foto'}}
-                      />
-                    </div>
-                  ))}
-                </div>
-                
-                <p className="mt-8 text-center text-sm text-gray-400">
-                  Mostrando selección de trabajos recientes. <br/>Para ver más, síguenos en Instagram.
-                </p>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* --- LIGHTBOX (Zoom) --- */}
+      {/* --- LIGHTBOX --- */}
       <AnimatePresence>
         {selectedImage && (
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[80] flex items-center justify-center bg-black/95 p-4 backdrop-blur-md"
-            onClick={() => setSelectedImage(null)}
-          >
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 backdrop-blur-md" onClick={() => setSelectedImage(null)}>
             <div className="relative max-w-5xl w-full flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
-              <button 
-                onClick={() => setSelectedImage(null)}
-                className="absolute -top-12 right-0 text-white hover:text-gray-300 p-2 bg-white/10 rounded-full"
-              >
-                <X size={24} />
-              </button>
-              <img 
-                src={selectedImage} 
-                alt="Zoom" 
-                className="max-h-[85vh] rounded-lg shadow-2xl border border-white/10" 
-                onError={(e) => {e.target.src = 'https://via.placeholder.com/800x600?text=Imagen+No+Encontrada'}}
-              />
+              <button onClick={() => setSelectedImage(null)} className="absolute -top-12 right-0 text-white hover:text-gray-300 p-2 bg-white/10 rounded-full"><X size={24} /></button>
+              <img src={selectedImage} alt="Zoom" className="max-h-[85vh] rounded-lg shadow-2xl border border-white/10" onError={(e) => {e.target.src = 'https://via.placeholder.com/800x600?text=Imagen+No+Encontrada'}} />
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
     </div>
   );
 };
 
-// Componente Tarjeta Material Simple
 const MaterialCard = ({ icon, title, desc, color, bg }) => (
   <div className={`p-6 rounded-xl border border-gray-100 transition-shadow hover:shadow-lg ${bg}`}>
-    <div className={`w-10 h-10 rounded-full bg-white flex items-center justify-center mb-4 ${color} shadow-sm`}>
-      {icon}
-    </div>
+    <div className={`w-10 h-10 rounded-full bg-white flex items-center justify-center mb-4 ${color} shadow-sm`}>{icon}</div>
     <h3 className="text-lg font-bold text-gray-800 mb-1">{title}</h3>
     <p className="text-sm text-gray-600">{desc}</p>
   </div>
