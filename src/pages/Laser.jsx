@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Zap, Box, Layers, Tag, Layout, Scissors, MessageCircle, Download, Check, X, Eye, FileText, Maximize2, ExternalLink } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { motion, AnimatePresence, useMotionTemplate, useMotionValue } from 'framer-motion';
+import { Zap, Box, Layers, Tag, Layout, Scissors, MessageCircle, Download, Check, X, Eye, FileText, Maximize2, ExternalLink, ChevronDown } from 'lucide-react';
 
 // --- DATOS DE CATEGORÍAS ---
 const laserCategories = [
@@ -9,7 +9,6 @@ const laserCategories = [
     title: 'Llaveros Personalizados',
     desc: 'El souvenir perfecto. Grabamos logotipos, nombres o fechas especiales en MDF, acrílico o madera.',
     features: ['Recuerdos para eventos', 'Merchandising económico', 'Diseños calados o grabados'],
-    // Puedes agregar MUCHAS imágenes aquí, el diseño ya no se romperá.
     images: [
       '/images/laser-llaveros.png', 
       '/images/laser-extra-1.png', 
@@ -74,43 +73,170 @@ const Laser = () => {
   const [activeCategory, setActiveCategory] = useState(laserCategories[0]);
   const [selectedImage, setSelectedImage] = useState(null);
 
+  // --- LÓGICA SPOTLIGHT (Mouse tracking) ---
+  const heroRef = useRef(null);
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  function handleMouseMove({ currentTarget, clientX, clientY }) {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
+
+  // Spotlight Naranja/Rojo Intenso para Láser
+  const backgroundCheck = useMotionTemplate`radial-gradient(
+    600px circle at ${mouseX}px ${mouseY}px,
+    rgba(249, 115, 22, 0.15), 
+    transparent 80%
+  )`;
+
   const openWhatsapp = (topic) => {
     const text = `Hola InnovaLab Center, quiero información sobre Corte Láser: ${topic || 'General'}.`;
     window.open(`https://wa.me/51987564941?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   return (
-    <div className="font-sans bg-gray-50 min-h-screen">
+    <div className="font-sans bg-gray-50 min-h-screen relative overflow-x-hidden selection:bg-orange-500 selection:text-white">
       
-      {/* Estilos para el Scrollbar personalizado */}
+      {/* ESTILOS ESPECÍFICOS PARA LÁSER */}
       <style>{`
+        /* Animación de "Cabeza Láser" recorriendo el borde */
+        @keyframes laser-path {
+          0% { top: 0; left: 0; }
+          25% { top: 0; left: 100%; }
+          50% { top: 100%; left: 100%; }
+          75% { top: 100%; left: 0; }
+          100% { top: 0; left: 0; }
+        }
+        
+        .laser-head {
+          position: absolute;
+          width: 4px;
+          height: 4px;
+          background: #fff;
+          box-shadow: 0 0 15px 5px #f97316, 0 0 30px 10px #ef4444; /* Resplandor Naranja/Rojo fuerte */
+          border-radius: 50%;
+          z-index: 20;
+          animation: laser-path 4s linear infinite;
+        }
+
+        /* Estela de corte (Opcional, simula el metal caliente) */
+        .laser-trail {
+            position: absolute;
+            inset: -1px;
+            border: 1px solid transparent;
+            border-image: linear-gradient(90deg, transparent, #f97316, transparent) 1;
+            mask: linear-gradient(#fff, #fff); /* Mascara simple */
+            opacity: 0.5;
+        }
+
+        /* Grid Isométrico de Fondo (Tono Naranja) */
+        .iso-grid-orange {
+          background-image: 
+            linear-gradient(rgba(249, 115, 22, 0.1) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(249, 115, 22, 0.1) 1px, transparent 1px);
+          background-size: 40px 40px;
+          transform: perspective(500px) rotateX(60deg);
+          transform-origin: center top;
+          opacity: 0.2;
+        }
+
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
       `}</style>
 
-      {/* --- 1. HERO SECTION --- */}
-      <section className="relative pt-36 pb-24 bg-[#1a1825] overflow-hidden">
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#E29930 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-orange-500/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-red-500/10 rounded-full blur-[120px] pointer-events-none" />
-        <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
-          <div>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-900/30 text-orange-400 text-sm font-bold mb-6 border border-orange-500/30 backdrop-blur-md">
-              <Zap size={16} /> Precisión Milimétrica
-            </div>
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 tracking-tight">
-              Corte y Grabado <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">Láser</span>
-            </h1>
-            <p className="text-gray-400 text-xl max-w-3xl mx-auto leading-relaxed font-light">
-              Desde regalos personalizados hasta producción industrial. Corte limpio y acabados profesionales.
-            </p>
-          </div>
+      {/* --- 1. HERO SECTION (DISEÑO "VECTOR CUT") --- */}
+      <section 
+        ref={heroRef}
+        onMouseMove={handleMouseMove}
+        className="relative min-h-screen flex flex-col justify-center items-center bg-[#0B0F19] overflow-hidden pt-20"
+      >
+        {/* FONDO: SUELO ISOMÉTRICO */}
+        <div className="absolute inset-0 flex items-end justify-center pointer-events-none overflow-hidden">
+           <div className="iso-grid-orange w-[200vw] h-[200vh] absolute top-1/2 -left-1/2"></div>
         </div>
+
+        {/* SPOTLIGHT DEL MOUSE */}
+        <motion.div
+          className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-300 opacity-100"
+          style={{ background: backgroundCheck }}
+        />
+
+        {/* DECORACIÓN FLOTANTE (Geometría Vectorial) */}
+        <div className="absolute top-1/4 left-[10%] w-32 h-32 border border-dashed border-orange-500/20 rounded-full hidden lg:block animate-spin-slow"></div>
+        <div className="absolute bottom-1/4 right-[10%] w-24 h-24 border border-red-500/20 rotate-45 hidden lg:block"></div>
+
+        {/* CONTENIDO CENTRADO */}
+        <div className="relative z-20 text-center px-6 max-w-5xl mx-auto">
+          
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}
+            className="flex justify-center items-center gap-4 mb-8"
+          >
+             <div className="h-[1px] w-12 bg-gray-700"></div>
+             <div className="px-3 py-1 rounded border border-orange-500/30 bg-orange-500/5 text-orange-500 text-xs font-bold tracking-widest uppercase flex items-center gap-2">
+               <Zap size={14} /> Corte CNC & Grabado
+             </div>
+             <div className="h-[1px] w-12 bg-gray-700"></div>
+          </motion.div>
+
+          {/* CAJA DEL TÍTULO "CORTADA" POR EL LÁSER */}
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }} 
+            animate={{ scale: 1, opacity: 1 }} 
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="relative inline-block py-10 px-8 md:px-16"
+          >
+             {/* El "Láser" recorriendo el borde */}
+             <div className="laser-head"></div>
+             
+             {/* Bordes estáticos sutiles */}
+             <div className="absolute inset-0 border border-white/5 bg-[#0B0F19]/50 backdrop-blur-sm -z-10"></div>
+
+             <h1 className="text-6xl md:text-8xl font-extrabold text-white leading-none tracking-tight mb-4 drop-shadow-2xl">
+               CORTE <span className="text-transparent bg-clip-text bg-gradient-to-b from-orange-400 to-red-600">LÁSER</span>
+             </h1>
+             <p className="text-gray-300 font-bold text-sm md:text-lg tracking-[0.2em] uppercase">
+               MDF • Acrílico • Cuero
+             </p>
+          </motion.div>
+
+          <motion.p 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
+            className="mt-10 text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed font-light"
+          >
+            Tecnología CO2 para cortes limpios y grabados detallados. 
+            Transformamos tus vectores digitales en productos físicos al instante.
+          </motion.p>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
+            className="mt-10 flex flex-wrap justify-center gap-4"
+          >
+             <button onClick={() => openWhatsapp('Cotización Láser')} className="group px-8 py-4 bg-orange-500 text-white font-bold text-lg rounded-xl hover:bg-white hover:text-orange-600 transition-all flex items-center gap-2 shadow-lg shadow-orange-500/20">
+                <Scissors size={20} /> Cotizar Corte
+             </button>
+             <a href="#galeria" className="group px-8 py-4 border border-gray-600 text-white font-medium text-lg rounded-xl hover:border-orange-500 hover:text-orange-500 transition-all backdrop-blur-sm">
+                Ver Galería
+             </a>
+          </motion.div>
+
+        </div>
+
+        {/* SCROLL INDICATOR */}
+        <motion.div 
+          animate={{ y: [0, 10, 0] }} transition={{ duration: 2, repeat: Infinity }}
+          className="absolute bottom-10 left-1/2 -translate-x-1/2 text-gray-500 flex flex-col items-center gap-2"
+        >
+           <span className="text-[10px] uppercase tracking-widest font-bold">Explorar</span>
+           <ChevronDown size={20} />
+        </motion.div>
       </section>
 
-      {/* --- 2. MATERIALES --- */}
+      {/* --- 2. MATERIALES (Sin cambios de diseño, solo props) --- */}
       <section className="py-16 bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-10">
@@ -125,8 +251,8 @@ const Laser = () => {
         </div>
       </section>
 
-      {/* --- 3. GALERÍA PRINCIPAL (FIX: SCROLLABLE) --- */}
-      <section className="py-20 bg-gray-50">
+      {/* --- 3. GALERÍA PRINCIPAL --- */}
+      <section id="galeria" className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-brand-dark mb-4">Nuestros Productos</h2>
@@ -169,7 +295,7 @@ const Laser = () => {
             <div className="lg:col-span-8">
               <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 h-[700px] flex flex-col">
                   
-                  {/* Encabezado de Categoría (Fijo) */}
+                  {/* Encabezado Fijo */}
                   <div className="mb-6 border-b border-gray-100 pb-6 shrink-0">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div>
@@ -192,8 +318,7 @@ const Laser = () => {
                     </div>
                   </div>
 
-                  {/* GRID DE IMÁGENES (SCROLLABLE) */}
-                  {/* Aquí está el cambio: overflow-y-auto y height completa restante */}
+                  {/* Grid Scrollable */}
                   <div className="overflow-y-auto custom-scrollbar pr-2 flex-grow">
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 pb-4">
                         {activeCategory.images.map((imgSrc, idx) => (
@@ -203,13 +328,13 @@ const Laser = () => {
                             onClick={() => setSelectedImage(imgSrc)}
                         >
                             <img 
-                            src={imgSrc} 
-                            alt={`${activeCategory.title} ${idx}`} 
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            onError={(e) => {e.target.src = 'https://via.placeholder.com/400x400?text=Foto+Referencia'}}
+                              src={imgSrc} 
+                              alt={`${activeCategory.title} ${idx}`} 
+                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              onError={(e) => {e.target.src = 'https://via.placeholder.com/400x400?text=Foto+Referencia'}}
                             />
                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <Eye className="text-white" size={32} />
+                              <Eye className="text-white" size={32} />
                             </div>
                         </div>
                         ))}
@@ -223,7 +348,7 @@ const Laser = () => {
         </div>
       </section>
 
-      {/* --- 4. SECCIÓN PDF PREMIUM --- */}
+      {/* --- 4. SECCIÓN PDF (Copia del diseño anterior) --- */}
       <section className="py-20 px-6 bg-gray-50 border-t border-gray-200">
         <div className="max-w-7xl mx-auto bg-[#1a1825] rounded-[2.5rem] p-10 md:p-16 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-orange-500/10 rounded-full blur-[150px] pointer-events-none"></div>

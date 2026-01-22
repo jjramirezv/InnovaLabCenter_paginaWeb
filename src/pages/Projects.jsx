@@ -6,9 +6,9 @@ import { Cpu, Settings, Monitor, Activity, ChevronRight, Play, X, MessageCircle,
 const specialties = [
   {
     id: 'mecatronica',
-    title: 'Colocar texto',
+    title: 'Mecatrónica',
     icon: <Cpu size={32} />,
-    desc: 'Colocar descripción',
+    desc: 'Sinergia entre mecánica, electrónica y control.',
     details: ['Automatización PLC/HMI', 'Robótica Industrial', 'Sistemas Embebidos'],
     color: 'text-purple-400',
     border: 'group-hover:border-purple-500/50',
@@ -16,9 +16,9 @@ const specialties = [
   },
   {
     id: 'mecanica',
-    title: 'Colocar texto',
+    title: 'Diseño Mecánico',
     icon: <Settings size={32} />,
-    desc: 'Colocar descripción',
+    desc: 'Ingeniería de detalle y manufactura avanzada.',
     details: ['Diseño CAD / CAE', 'Análisis de Elementos Finitos', 'Prototipado CNC/3D'],
     color: 'text-blue-400',
     border: 'group-hover:border-blue-500/50',
@@ -26,9 +26,9 @@ const specialties = [
   },
   {
     id: 'sistemas',
-    title: 'Colocar texto',
+    title: 'Software & IoT',
     icon: <Monitor size={32} />,
-    desc: 'Colocar descripción',
+    desc: 'Digitalización y control remoto de procesos.',
     details: ['Dashboards en Tiempo Real', 'Integración Cloud (AWS/Azure)', 'Apps de Control Industrial'],
     color: 'text-cyan-400',
     border: 'group-hover:border-cyan-500/50',
@@ -39,50 +39,50 @@ const specialties = [
 const projectsData = [
   {
     id: 1,
-    title: 'Colocar texto',
+    title: 'Brazo Robótico Clasificador',
     category: 'Mecatrónica',
     status: 'Terminado',
-    desc: 'Colocar descripción',
+    desc: 'Sistema de visión artificial integrado con cinemática inversa para selección de frutos.',
     video: '/videos/proy-brazo.mp4' 
   },
   {
     id: 2,
-    title: 'Colocar texto',
+    title: 'Sistema de Riego IoT',
     category: 'Sistemas',
     status: 'Terminado',
-    desc: 'Colocar descripción',
+    desc: 'Monitoreo de humedad de suelo y control de electroválvulas desde App Móvil.',
     video: '/videos/proy-riego.mp4' 
   },
   {
     id: 3,
-    title: 'Colocar texto',
+    title: 'Rover de Exploración',
     category: 'Mecánica',
     status: 'En Desarrollo',
-    desc: 'Colocar descripción',
+    desc: 'Diseño de suspensión rocker-bogie y chasis en aluminio 6061 para terrenos irregulares.',
     video: '/videos/proy-rover.mp4'
   },
   {
     id: 4,
-    title: 'Colocar texto',
+    title: 'Faja Transportadora Inteligente',
     category: 'Mecatrónica',
     status: 'Terminado',
-    desc: 'Colocar descripción',
+    desc: 'Control PID de velocidad y conteo automático de producción con logging en base de datos.',
     video: '/videos/proy-faja.mp4'
   },
   {
     id: 5,
-    title: 'Colocar texto',
+    title: 'Dashboard SCADA Web',
     category: 'Sistemas',
     status: 'Terminado',
-    desc: 'Colocar descripción',
+    desc: 'Interfaz gráfica de alto nivel para supervisión de planta industrial en tiempo real.',
     video: '/videos/proy-scada.mp4'
   },
   {
     id: 6,
-    title: 'Colocar texto',
+    title: 'Molino Automatizado',
     category: 'Mecánica',
     status: 'Terminado',
-    desc: 'Colocar descripción',
+    desc: 'Rediseño de transmisión de potencia y automatización de tolva de alimentación.',
     video: '/videos/proy-molino.mp4'
   }
 ];
