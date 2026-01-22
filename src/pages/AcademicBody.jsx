@@ -1,98 +1,40 @@
-import React, { useState, useRef } from 'react';
-import { motion, AnimatePresence, useMotionTemplate, useMotionValue } from 'framer-motion';
-import { Users, Target, Eye, Mail, Award, Terminal, Cpu, Code, ChevronRight, Linkedin, Github, PenTool, Database, Wifi, Wrench, Share2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, useMotionTemplate, useMotionValue } from 'framer-motion';
+import { Users, Target, Eye, Mail, Share2, Linkedin, Github, Award, Terminal, Cpu, PenTool, Wifi, Wrench } from 'lucide-react';
 
-// --- DATOS DEL EQUIPO (8 Integrantes) ---
-const teamMembers = [
+// --- FIREBASE ---
+import { db } from '../firebaseConfig';
+import { collection, getDocs } from 'firebase/firestore';
+
+// --- DATOS DE RESPALDO (Por si la BD está vacía al inicio) ---
+const staticTeamMembers = [
   {
-    id: 1,
+    id: 'static-1',
     name: 'Ing. Carlos Pérez',
     role: 'Director General',
     specialty: 'Mecatrónica & Robótica',
     desc: 'Especialista en automatización industrial con 10 años de experiencia liderando proyectos tecnológicos.',
     email: 'director@innovalab.com',
-    image: '/images/member1.jpg',
+    image: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=1000',
     color: 'text-cyan-400',
     icon: <Award size={20} className="text-cyan-400" />
   },
-  {
-    id: 2,
-    name: 'Lic. Ana Gomez',
-    role: 'Coord. Académica',
-    specialty: 'Gestión Educativa',
-    desc: 'Apasionada por la enseñanza STEAM y el desarrollo de currículas innovadoras para jóvenes y universitarios.',
-    email: 'academico@innovalab.com',
-    image: '/images/member2.jpg',
-    color: 'text-purple-400',
-    icon: <Users size={20} className="text-purple-400" />
-  },
-  {
-    id: 3,
-    name: 'Ing. David Torres',
-    role: 'Lead Developer',
-    specialty: 'Software & IoT',
-    desc: 'Arquitecto de soluciones cloud y desarrollador Full Stack enfocado en sistemas industriales y dashboards.',
-    email: 'dev@innovalab.com',
-    image: '/images/member3.jpg',
-    color: 'text-green-400',
-    icon: <Terminal size={20} className="text-green-400" />
-  },
-  {
-    id: 4,
-    name: 'Tec. Sofia Ruiz',
-    role: 'Jefa de Taller',
-    specialty: 'Manufactura Digital',
-    desc: 'Experta en impresión 3D, corte láser y prototipado rápido de alta precisión para ingeniería.',
-    email: 'taller@innovalab.com',
-    image: '/images/member4.jpg',
-    color: 'text-orange-400',
-    icon: <Cpu size={20} className="text-orange-400" />
-  },
-  {
-    id: 5,
-    name: 'Ing. Marco Díaz',
-    role: 'Especialista IA',
-    specialty: 'Visión Artificial',
-    desc: 'Investigador en algoritmos de Machine Learning aplicados al reconocimiento de imágenes y control.',
-    email: 'ia@innovalab.com',
-    image: '/images/member5.jpg',
-    color: 'text-blue-500',
-    icon: <Eye size={20} className="text-blue-500" />
-  },
-  {
-    id: 6,
-    name: 'Lic. Laura Velez',
-    role: 'Diseño de Producto',
-    specialty: 'UX/UI & Prototipado',
-    desc: 'Encargada de la experiencia de usuario en nuestros sistemas y la estética funcional de los robots.',
-    email: 'design@innovalab.com',
-    image: '/images/member6.jpg',
-    color: 'text-pink-400',
-    icon: <PenTool size={20} className="text-pink-400" />
-  },
-  {
-    id: 7,
-    name: 'Ing. Jorge Quispe',
-    role: 'Instructor Senior',
-    specialty: 'Microcontroladores',
-    desc: 'Docente especializado en arquitectura de procesadores ARM, PIC y programación embebida avanzada.',
-    email: 'instructor@innovalab.com',
-    image: '/images/member7.jpg',
-    color: 'text-red-400',
-    icon: <Wifi size={20} className="text-red-400" />
-  },
-  {
-    id: 8,
-    name: 'Tec. Luis Mamani',
-    role: 'Soporte Hardware',
-    specialty: 'Electrónica de Potencia',
-    desc: 'Responsable del mantenimiento de equipos CNC y diseño de PCBs para proyectos de alta demanda.',
-    email: 'soporte@innovalab.com',
-    image: '/images/member8.jpg',
-    color: 'text-teal-400',
-    icon: <Wrench size={20} className="text-teal-400" />
-  }
+  // ... puedes dejar uno o dos más de ejemplo
 ];
+
+// Utilería para asignar iconos/colores al azar a los datos de Firebase
+// (Ya que la BD no guarda componentes de React ni clases de Tailwind)
+const getMemberStyle = (index) => {
+  const styles = [
+    { color: 'text-cyan-400', icon: <Award size={20} className="text-cyan-400" /> },
+    { color: 'text-purple-400', icon: <Users size={20} className="text-purple-400" /> },
+    { color: 'text-green-400', icon: <Terminal size={20} className="text-green-400" /> },
+    { color: 'text-orange-400', icon: <Cpu size={20} className="text-orange-400" /> },
+    { color: 'text-pink-400', icon: <PenTool size={20} className="text-pink-400" /> },
+    { color: 'text-teal-400', icon: <Wrench size={20} className="text-teal-400" /> },
+  ];
+  return styles[index % styles.length];
+};
 
 // Variantes de animación
 const containerVariants = {
@@ -109,7 +51,39 @@ const itemVariants = {
 };
 
 const AcademicBody = () => {
-  // --- LÓGICA SPOTLIGHT (Solo para el Hero) ---
+  const [teamMembers, setTeamMembers] = useState(staticTeamMembers);
+
+  // --- CARGAR DE FIREBASE ---
+  useEffect(() => {
+    const fetchTeam = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "equipo"));
+        const firebaseMembers = querySnapshot.docs.map((doc, index) => {
+          const data = doc.data();
+          const style = getMemberStyle(index); // Asignar estilo visual dinámico
+          return {
+            id: doc.id,
+            ...data,
+            // Fallbacks por si faltan datos
+            desc: data.desc || 'Miembro del equipo InnovaLab Center.',
+            email: data.email || 'contacto@innovalab.com',
+            color: style.color,
+            icon: style.icon
+          };
+        });
+
+        if (firebaseMembers.length > 0) {
+          setTeamMembers(firebaseMembers);
+        }
+      } catch (error) {
+        console.error("Error cargando equipo:", error);
+      }
+    };
+
+    fetchTeam();
+  }, []);
+
+  // --- LÓGICA SPOTLIGHT ---
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
@@ -129,14 +103,12 @@ const AcademicBody = () => {
     <div className="font-sans bg-[#0B0F19] min-h-screen text-white selection:bg-cyan-500 selection:text-white">
       
       <style>{`
-        /* Animación de Nodos Conectados (Constelación) */
         .constellation-bg {
           background-image: 
             radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
           background-size: 30px 30px;
           mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
         }
-        
         @keyframes float-nodes {
           0% { transform: translateY(0px) translateX(0px); }
           33% { transform: translateY(-10px) translateX(5px); }
@@ -146,18 +118,13 @@ const AcademicBody = () => {
         .animate-float-nodes { animation: float-nodes 10s ease-in-out infinite; }
       `}</style>
 
-      {/* --- 1. HERO SECTION (DISEÑO MEJORADO: RED NEURAL) --- */}
+      {/* --- 1. HERO SECTION --- */}
       <section 
         onMouseMove={handleMouseMove}
         className="relative pt-40 pb-24 overflow-hidden flex flex-col justify-center items-center group"
       >
-        {/* Fondo Base */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#0f172a] to-[#0B0F19]"></div>
-        
-        {/* Constelación de Nodos (Animada) */}
         <div className="absolute inset-0 z-0 opacity-30 constellation-bg animate-float-nodes"></div>
-
-        {/* Spotlight */}
         <motion.div
           className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-300 opacity-100"
           style={{ background: backgroundCheck }}
@@ -169,17 +136,14 @@ const AcademicBody = () => {
             animate={{ opacity: 1, y: 0 }} 
             transition={{ duration: 0.8 }}
           >
-            {/* Badge Tech */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/5 text-cyan-400 text-xs font-mono tracking-widest uppercase mb-8 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
               <Share2 size={12} /> Red de Expertos
             </div>
             
-            {/* Título con Efecto de Profundidad */}
             <h1 className="text-5xl md:text-7xl font-extrabold mb-6 tracking-tight relative">
               <span className="relative z-10 text-white drop-shadow-2xl">
                 Cuerpo Académico
               </span>
-              {/* Sombra de color detrás */}
               <span className="absolute left-1 top-1 text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-purple-600 opacity-30 blur-sm -z-10 select-none">
                 Cuerpo Académico
               </span>
@@ -192,7 +156,6 @@ const AcademicBody = () => {
           </motion.div>
         </div>
         
-        {/* Divisor difuminado */}
         <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-[#0B0F19] to-transparent z-20"></div>
       </section>
 
@@ -244,7 +207,7 @@ const AcademicBody = () => {
         </div>
       </section>
 
-      {/* --- 3. CUERPO ACADÉMICO (Grid de 8) --- */}
+      {/* --- 3. CUERPO ACADÉMICO (Grid Dinámico) --- */}
       <section className="py-24 bg-[#0F1420] border-t border-white/5">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
@@ -308,26 +271,11 @@ const AcademicBody = () => {
                   </div>
                 </div>
                 
-                {/* Borde inferior brillante dinámico */}
                 <div className={`absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-transparent via-current to-transparent opacity-0 group-hover:opacity-100 transition-opacity ${member.color}`}></div>
               </motion.div>
             ))}
           </motion.div>
 
-        </div>
-      </section>
-
-      {/* --- 4. CTA FOOTER --- */}
-      <section className="py-20 text-center relative overflow-hidden">
-        <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
-        <div className="relative z-10 max-w-3xl mx-auto px-6">
-           <h2 className="text-3xl font-bold text-white mb-6">¿Quieres unirte al equipo?</h2>
-           <p className="text-gray-400 mb-8">
-             Siempre estamos buscando talento apasionado por la tecnología. Si crees que tienes lo necesario para innovar con nosotros, envíanos tu CV.
-           </p>
-           <a href="mailto:rrhh@innovalab.com" className="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold transition-all backdrop-blur-md">
-             <Mail size={20} /> Enviar Portafolio
-           </a>
         </div>
       </section>
 
