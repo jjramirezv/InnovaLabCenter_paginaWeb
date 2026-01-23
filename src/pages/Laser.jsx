@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence, useMotionTemplate, useMotionValue } from 'framer-motion';
+import { motion, AnimatePresence, useMotionTemplate, useMotionValue, useSpring } from 'framer-motion';
 import { Zap, Box, Layers, Tag, Layout, Scissors, MessageCircle, Download, Check, X, Eye, FileText, Maximize2, ExternalLink, ChevronDown } from 'lucide-react';
 import { db } from '../firebaseConfig';
 import { collection, getDocs, query, where } from 'firebase/firestore';
@@ -35,8 +35,6 @@ const initialLaserCategories = [
     images: []
   },
   {
-    // IMPORTANTE: Ajusté este título para evitar duplicados comunes.
-    // Si en tu admin dice "Producción Empresas", el código tratará de unirlos.
     id: 'empresas',
     title: 'Producción para Empresas', 
     desc: 'Corte masivo para grandes pedidos. Optimizamos material para reducir costos en tu producción.',
@@ -74,7 +72,6 @@ const Laser = () => {
 
         // --- FUSIÓN ROBUSTA ---
         const mergedData = initialLaserCategories.map(staticCat => {
-            // Buscamos coincidencia aproximada para evitar duplicados por una palabra
             const match = fbCats.find(fb => {
                 const t1 = fb.title.toLowerCase().replace('para ', '').trim();
                 const t2 = staticCat.title.toLowerCase().replace('para ', '').trim();
@@ -86,7 +83,7 @@ const Laser = () => {
                 return {
                     ...staticCat,
                     id: match.id, 
-                    title: match.title, // Prioridad al título de Firebase si quieres editarlo allá
+                    title: match.title,
                     desc: match.desc,
                     features: match.features || staticCat.features,
                     images: newImagesMap[match.id] ? newImagesMap[match.id].sort((a,b)=>b.date-a.date).map(i=>i.url) : []
@@ -115,44 +112,82 @@ const Laser = () => {
 
   // --- LÓGICA VISUAL ---
   const heroRef = useRef(null);
+  
+  // Usamos Spring para que el láser tenga un ligero retraso "mecánico" y se sienta más real
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
+  const smoothX = useSpring(mouseX, { damping: 20, stiffness: 300 });
+  const smoothY = useSpring(mouseY, { damping: 20, stiffness: 300 });
+
   function handleMouseMove({ currentTarget, clientX, clientY }) {
     const { left, top } = currentTarget.getBoundingClientRect();
     mouseX.set(clientX - left);
     mouseY.set(clientY - top);
   }
-  const backgroundCheck = useMotionTemplate`radial-gradient(600px circle at ${mouseX}px ${mouseY}px, rgba(249, 115, 22, 0.15), transparent 80%)`;
+
+  // El brillo de fondo que pediste mantener
+  const backgroundCheck = useMotionTemplate`radial-gradient(600px circle at ${mouseX}px ${mouseY}px, rgba(249, 116, 22, 0.30), transparent 80%)`;
+  
   const openWhatsapp = (topic) => window.open(`https://wa.me/51987564941?text=Info Laser: ${topic}`, '_blank');
 
   return (
     <div className="font-sans bg-gray-50 min-h-screen relative overflow-x-hidden selection:bg-orange-500 selection:text-white">
       <style>{`
-        @keyframes laser-path { 0% { top: 0; left: 0; } 25% { top: 0; left: 100%; } 50% { top: 100%; left: 100%; } 75% { top: 100%; left: 0; } 100% { top: 0; left: 0; } }
-        .laser-head { position: absolute; width: 4px; height: 4px; background: #fff; box-shadow: 0 0 15px 5px #f97316, 0 0 30px 10px #ef4444; border-radius: 50%; z-index: 20; animation: laser-path 4s linear infinite; }
+        /* Animación para la "chispa" alrededor del cursor láser */
+        @keyframes spark-spin { 
+          0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 0.8; } 
+          50% { transform: translate(-50%, -50%) rotate(180deg) scale(1.2); opacity: 0.4; } 
+          100% { transform: translate(-50%, -50%) rotate(360deg) scale(1); opacity: 0.8; } 
+        }
+        
         .iso-grid-orange { background-image: linear-gradient(rgba(249, 115, 22, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(249, 115, 22, 0.1) 1px, transparent 1px); background-size: 40px 40px; transform: perspective(500px) rotateX(60deg); transform-origin: center top; opacity: 0.2; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; } .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; } .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
       `}</style>
+      
+      {/* HERO SECTION - AQUÍ ESTÁ EL CAMBIO DEL CURSOR LÁSER */}
+      <section 
+        ref={heroRef} 
+        onMouseMove={handleMouseMove} 
+        className="relative min-h-screen flex flex-col justify-center items-center bg-[#0B0F19] overflow-hidden pt-20 cursor-none" // <-- cursor-none oculta el mouse normal
+      >
+        {/* EL CURSOR LÁSER PERSONALIZADO */}
+        <motion.div 
+            className="pointer-events-none fixed z-50 mix-blend-screen hidden lg:block"
+            style={{ left: smoothX, top: smoothY, position: 'absolute' }}
+        >
+            {/* Núcleo del láser (punto blanco brillante) */}
+            <div className="w-4 h-4 bg-white rounded-full shadow-[0_0_15px_3px_#f97316] absolute -translate-x-1/2 -translate-y-1/2"></div>
+            {/* Anillo de energía/chispa rotatoria */}
+            <div className="w-8 h-8 border-2 border-dashed border-orange-500 rounded-full absolute -translate-x-1/2 -translate-y-1/2 animate-[spark-spin_2s_linear_infinite]"></div>
+            {/* Haz de luz vertical (opcional, para efecto de cabezal) */}
+            <div className="w-[1px] h-[1000px] bg-gradient-to-t from-orange-500/0 via-orange-500/20 to-orange-500/0 absolute bottom-0 left-0 -translate-x-1/2 pointer-events-none"></div>
+        </motion.div>
 
-      {/* HERO SECTION */}
-      <section ref={heroRef} onMouseMove={handleMouseMove} className="relative min-h-screen flex flex-col justify-center items-center bg-[#0B0F19] overflow-hidden pt-20">
         <div className="absolute inset-0 flex items-end justify-center pointer-events-none overflow-hidden"><div className="iso-grid-orange w-[200vw] h-[200vh] absolute top-1/2 -left-1/2"></div></div>
+        
+        {/* Tu brillo de fondo original */}
         <motion.div className="pointer-events-none absolute inset-0 z-10 transition-opacity duration-300 opacity-100" style={{ background: backgroundCheck }} />
+        
         <div className="absolute top-1/4 left-[10%] w-32 h-32 border border-dashed border-orange-500/20 rounded-full hidden lg:block animate-spin-slow"></div>
         <div className="absolute bottom-1/4 right-[10%] w-24 h-24 border border-red-500/20 rotate-45 hidden lg:block"></div>
+        
         <div className="relative z-20 text-center px-6 max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }} className="flex justify-center items-center gap-4 mb-8">
              <div className="h-[1px] w-12 bg-gray-700"></div><div className="px-3 py-1 rounded border border-orange-500/30 bg-orange-500/5 text-orange-500 text-xs font-bold tracking-widest uppercase flex items-center gap-2"><Zap size={14} /> Corte CNC & Grabado</div><div className="h-[1px] w-12 bg-gray-700"></div>
           </motion.div>
+          
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.8, ease: "easeOut" }} className="relative inline-block py-10 px-8 md:px-16">
-             <div className="laser-head"></div><div className="absolute inset-0 border border-white/5 bg-[#0B0F19]/50 backdrop-blur-sm -z-10"></div>
+             {/* Eliminada la animación cuadrada laser-head antigua */}
+             <div className="absolute inset-0 border border-white/5 bg-[#0B0F19]/50 backdrop-blur-sm -z-10"></div>
              <h1 className="text-6xl md:text-8xl font-extrabold text-white leading-none tracking-tight mb-4 drop-shadow-2xl">CORTE <span className="text-transparent bg-clip-text bg-gradient-to-b from-orange-400 to-red-600">LÁSER</span></h1>
              <p className="text-gray-300 font-bold text-sm md:text-lg tracking-[0.2em] uppercase">MDF • Acrílico • Cuero</p>
           </motion.div>
+
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="mt-10 text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed font-light">Tecnología CO2 para cortes limpios y grabados detallados. Transformamos tus vectores digitales en productos físicos al instante.</motion.p>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="mt-10 flex flex-wrap justify-center gap-4">
-             <button onClick={() => openWhatsapp('Cotización Láser')} className="group px-8 py-4 bg-orange-500 text-white font-bold text-lg rounded-xl hover:bg-white hover:text-orange-600 transition-all flex items-center gap-2 shadow-lg shadow-orange-500/20"><Scissors size={20} /> Cotizar Corte</button>
-             <a href="#galeria" className="group px-8 py-4 border border-gray-600 text-white font-medium text-lg rounded-xl hover:border-orange-500 hover:text-orange-500 transition-all backdrop-blur-sm">Ver Galería</a>
+             {/* Botones con cursor-pointer explicito para reactivar interaccion visual */}
+             <button onClick={() => openWhatsapp('Cotización Láser')} className="cursor-pointer group px-8 py-4 bg-orange-500 text-white font-bold text-lg rounded-xl hover:bg-white hover:text-orange-600 transition-all flex items-center gap-2 shadow-lg shadow-orange-500/20 relative z-30"><Scissors size={20} /> Cotizar Corte</button>
+             <a href="#galeria" className="cursor-pointer group px-8 py-4 border border-gray-600 text-white font-medium text-lg rounded-xl hover:border-orange-500 hover:text-orange-500 transition-all backdrop-blur-sm relative z-30">Ver Galería</a>
           </motion.div>
         </div>
         <motion.div animate={{ y: [0, 10, 0] }} transition={{ duration: 2, repeat: Infinity }} className="absolute bottom-10 left-1/2 -translate-x-1/2 text-gray-500 flex flex-col items-center gap-2"><span className="text-[10px] uppercase tracking-widest font-bold">Explorar</span><ChevronDown size={20} /></motion.div>
@@ -269,13 +304,10 @@ const Laser = () => {
             <a href="https://wa.me/51987564941?text=Hola%20InnovaLab%20Center,%20quiero%20información%20sobre%20Corte%20Láser." target="_blank" rel="noreferrer" className="inline-flex items-center gap-3 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold py-5 px-12 rounded-full shadow-2xl shadow-green-900/30 transition-all hover:scale-105"><MessageCircle size={28} /> Solicitar Cotización</a>
          </div>
       </section>
-
-      {/* LIGHTBOX */}
       <AnimatePresence>{selectedImage && (<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4 backdrop-blur-md" onClick={() => setSelectedImage(null)}><div className="relative max-w-5xl w-full flex flex-col items-center" onClick={(e) => e.stopPropagation()}><button onClick={() => setSelectedImage(null)} className="absolute -top-12 right-0 text-white hover:text-gray-300 p-2 bg-white/10 rounded-full"><X size={24} /></button><img src={selectedImage} alt="Zoom" className="max-h-[85vh] rounded-lg shadow-2xl border border-white/10" onError={(e)=>{e.target.src='https://via.placeholder.com/800x600?text=No+Image'}} /></div></motion.div>)}</AnimatePresence>
     </div>
   );
 };
-
 const MaterialCard = ({ icon, title, desc, color, bg }) => (
   <div className={`p-6 rounded-xl border border-gray-100 transition-shadow hover:shadow-lg ${bg}`}>
     <div className={`w-10 h-10 rounded-full bg-white flex items-center justify-center mb-4 ${color} shadow-sm`}>{icon}</div>

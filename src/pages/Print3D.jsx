@@ -148,7 +148,7 @@ const Print3D = () => {
     mouseX.set(clientX - left);
     mouseY.set(clientY - top);
   }
-  const backgroundCheck = useMotionTemplate`radial-gradient(650px circle at ${mouseX}px ${mouseY}px, rgba(34, 211, 238, 0.15), transparent 80%)`;
+  const backgroundCheck = useMotionTemplate`radial-gradient(650px circle at ${mouseX}px ${mouseY}px, rgba(34, 211, 238, 0.32), transparent 80%)`;
   const openWhatsapp = (topic) => window.open(`https://wa.me/51987564941?text=Hola InnovaLab, info sobre: ${topic}`, '_blank');
 
   return (

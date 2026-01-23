@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, Box, Cpu, Zap, Activity, CheckCircle, MapPin, Instagram, Facebook, Phone, Layers, Code, Play } from 'lucide-react';
 import { motion, useMotionTemplate, useMotionValue } from 'framer-motion';
 import { db } from '../firebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 
 const Home = () => {
+  // 1. ESTADO DEL HERO (PORTADA)
   const [heroData, setHeroData] = useState({
     heroTitle: 'Ingeniería \nSin Límites.',
     heroSubtitle: 'Fusionamos la creatividad digital con la manufactura industrial. Desarrollo de Software, IoT y Prototipado 3D en el corazón de Huancayo.',
@@ -13,29 +14,48 @@ const Home = () => {
     heroImage: '' 
   });
 
+  // 2. ESTADO DE SERVICIOS
+  const [serviceImgs, setServiceImgs] = useState({
+    robotica: '/images/uni1.png',
+    print3d: '/images/fig1.png',
+    laser: '/images/laser-placas2.png'
+  });
+
+  // 3. ESTADO DE GALERÍA
+  const [galleryItems, setGalleryItems] = useState([]);
+
   useEffect(() => {
-    const fetchHomeData = async () => {
+    const fetchData = async () => {
       try {
+        // Cargar Portada
         const docRef = doc(db, "web_content", "home_hero");
         const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setHeroData(docSnap.data());
-        }
+        if (docSnap.exists()) setHeroData(prev => ({ ...prev, ...docSnap.data() }));
+
+        // Cargar Servicios
+        const srvRef = doc(db, "web_content", "home_services");
+        const srvSnap = await getDoc(srvRef);
+        if (srvSnap.exists()) setServiceImgs(prev => ({ ...prev, ...srvSnap.data() }));
+
+        // Cargar Galería
+        const galSnap = await getDocs(collection(db, "home_gallery"));
+        const items = galSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        setGalleryItems(items);
+
       } catch (error) { console.error(error); }
     };
-    fetchHomeData();
+    fetchData();
   }, []);
 
+  // Lógica Visual
   const heroRef = useRef(null);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-
   function handleMouseMove({ currentTarget, clientX, clientY }) {
     const { left, top } = currentTarget.getBoundingClientRect();
     mouseX.set(clientX - left);
     mouseY.set(clientY - top);
   }
-
   const backgroundCheck = useMotionTemplate`radial-gradient(600px circle at ${mouseX}px ${mouseY}px, rgba(56, 189, 248, 0.30), transparent 80%)`;
 
   return (
@@ -43,12 +63,19 @@ const Home = () => {
       
       {/* 1. HERO SECTION */}
       <section ref={heroRef} onMouseMove={handleMouseMove} className="relative min-h-screen flex items-center pt-20 overflow-hidden bg-[#0B0F19] group">
+        
+        {/* IMAGEN DE FONDO (SI EXISTE) */}
         {heroData.heroImage && (
             <div className="absolute inset-0 z-0">
-                <img src={heroData.heroImage} alt="Hero" className="w-full h-full object-cover opacity-30 mix-blend-luminosity transition-opacity duration-1000"/>
+                <img 
+                    src={heroData.heroImage} 
+                    alt="Hero Background" 
+                    className="w-full h-full object-cover opacity-40 mix-blend-luminosity transition-opacity duration-1000"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F19] via-[#0B0F19]/80 to-transparent"></div>
             </div>
         )}
+
         <div className="absolute inset-0 z-0 opacity-20 pointer-events-none" style={{ backgroundImage: `linear-gradient(#217CA3 1px, transparent 1px), linear-gradient(90deg, #217CA3 1px, transparent 1px)`, backgroundSize: '50px 50px' }}></div>
         <motion.div className="pointer-events-none absolute -inset-px opacity-0 transition duration-300 group-hover:opacity-100 z-10" style={{ background: backgroundCheck }} />
         
@@ -58,12 +85,12 @@ const Home = () => {
               <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-primary opacity-75"></span><span className="relative inline-flex rounded-full h-2 w-2 bg-brand-primary"></span></span>
               <span className="text-brand-primary text-xs font-mono tracking-widest uppercase">InnovaLab Center</span>
             </div>
-            <h1 className="text-5xl lg:text-7xl font-extrabold text-white leading-tight mb-6 tracking-tight whitespace-pre-line">{heroData.heroTitle || "Ingeniería \nSin Límites."}</h1>
+            <h1 className="text-5xl lg:text-7xl font-extrabold text-white leading-tight mb-6 tracking-tight whitespace-pre-line">{heroData.heroTitle}</h1>
             <p className="text-gray-400 text-lg lg:text-xl max-w-lg mb-10 leading-relaxed font-light border-l-2 border-brand-primary/50 pl-6">{heroData.heroSubtitle}</p>
             <div className="flex flex-wrap gap-5">
               <a href="#servicios" className="group relative px-8 py-4 bg-brand-primary text-white font-bold rounded-xl overflow-hidden shadow-lg shadow-brand-primary/25 transition-all hover:scale-105">
                 <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
-                <span className="relative flex items-center gap-2">{heroData.heroButtonText || "Explorar Servicios"} <ArrowRight className="w-5 h-5" /></span>
+                <span className="relative flex items-center gap-2">{heroData.heroButtonText} <ArrowRight className="w-5 h-5" /></span>
               </a>
               <Link to="/contacto" className="px-8 py-4 rounded-xl border border-white/10 text-white font-medium hover:bg-white/5 hover:border-white/30 transition-all backdrop-blur-sm">Iniciar Proyecto</Link>
             </div>
@@ -92,29 +119,36 @@ const Home = () => {
           <h2 className="text-4xl font-extrabold text-brand-dark mt-2">Ecosistema de Servicios</h2>
           <div className="h-1 w-24 bg-gradient-to-r from-brand-secondary to-brand-primary mt-4 mx-auto md:mx-0 rounded-full"></div>
         </motion.div>
+
         <div className="grid md:grid-cols-3 gap-6 auto-rows-[300px]">
           <Link to="/robotica" className="md:col-span-2 group relative rounded-3xl overflow-hidden bg-[#0B0F19] border border-gray-800 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
             <div className="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent z-10 p-10 flex flex-col justify-between">
               <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/10 text-brand-accent group-hover:scale-110 transition-transform"><Cpu size={28} /></div>
               <div><h3 className="text-3xl font-bold text-white mb-2">Robótica Avanzada</h3><p className="text-gray-400 mb-4 max-w-md">Kits educativos y soluciones industriales.</p><span className="inline-flex items-center gap-2 text-brand-accent font-bold group-hover:translate-x-2 transition-transform">Ver Proyectos <ArrowRight size={18} /></span></div>
             </div>
-            <img src="/images/uni1.png" className="absolute right-0 top-0 w-3/4 h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-700 mask-image-gradient" alt="Robótica" />
+            {/* IMAGEN ROBÓTICA */}
+            <img src={serviceImgs.robotica} className="absolute right-0 top-0 w-3/4 h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-700 mask-image-gradient" alt="Robótica" />
           </Link>
+
           <Link to="/impresion-3d" className="md:row-span-2 group relative rounded-3xl overflow-hidden bg-[#0B0F19] border border-gray-800 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent z-10 p-10 flex flex-col justify-between">
               <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center border border-white/10 text-blue-400 group-hover:scale-110 transition-transform"><Box size={28} /></div>
               <div><h3 className="text-3xl font-bold text-white mb-2">Impresión 3D</h3><p className="text-gray-400 mb-4">Resina 8K y Filamento de alta resistencia.</p><span className="inline-flex items-center gap-2 text-blue-400 font-bold group-hover:translate-x-2 transition-transform">Ver Materiales <ArrowRight size={18} /></span></div>
             </div>
-            <img src="/images/fig1.png" className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-all duration-700" alt="3D Printing" />
+            {/* IMAGEN 3D */}
+            <img src={serviceImgs.print3d} className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:scale-105 transition-all duration-700" alt="3D Printing" />
           </Link>
+
           <Link to="/corte-laser" className="group relative rounded-3xl overflow-hidden bg-[#0B0F19] border border-gray-800 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
             <div className="absolute inset-0 bg-black/60 group-hover:bg-black/40 transition-colors z-10 p-8 flex flex-col justify-end">
               <Zap className="text-brand-secondary mb-4 group-hover:text-white transition-colors" size={32} />
               <h3 className="text-2xl font-bold text-white mb-1">Corte Láser</h3>
               <span className="text-gray-300 text-sm group-hover:text-white transition-colors">Precisión milimétrica →</span>
             </div>
-            <img src="/images/laser-placas2.png" className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition-transform duration-700" alt="Corte Láser" />
+            {/* IMAGEN LÁSER */}
+            <img src={serviceImgs.laser} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:scale-110 transition-transform duration-700" alt="Corte Láser" />
           </Link>
+
           <Link to="/proyectos" className="group relative rounded-3xl overflow-hidden bg-brand-primary border border-gray-800 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-1">
              <div className="absolute inset-0 bg-[#0B0F19] m-[2px] rounded-[22px] flex items-center justify-center group-hover:bg-opacity-90 transition-all overflow-hidden">
                <div className="text-center z-10 p-6"><Activity className="text-white mx-auto mb-3" size={40} /><h3 className="text-xl font-bold text-white">Ingeniería</h3><p className="text-gray-400 text-xs mt-2">Soluciones Integrales</p></div>
@@ -124,8 +158,8 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 3. GALERÍA DE IMPACTO (ESTILO CYBER-INDUSTRIAL) */}
-      <section className="py-24 bg-[#020617] relative overflow-hidden border-y border-white/5">
+      {/* 3. GALERÍA DE IMPACTO */}
+      <section className="py-24 bg-[#020617] relative border-y border-white/5 overflow-hidden">
         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-5 mix-blend-overlay"></div>
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-primary/10 rounded-full blur-[100px] pointer-events-none"></div>
 
@@ -138,12 +172,17 @@ const Home = () => {
             <Link to="/proyectos" className="group flex items-center gap-3 text-white border-b border-white/30 pb-1 hover:border-brand-primary hover:text-brand-primary transition-all">Ver galería completa <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform"/></Link>
           </div>
 
-          {/* GRID DE CYBER CARDS */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-             <CyberCard img="/images/per3.png" title="Prototipado" subtitle="Alta Fidelidad" tag="3D" color="border-cyan-500/50" />
-             <CyberCard img="/images/laser-extra-1.png" title="Merchandising" subtitle="Corte Láser" tag="LÁSER" color="border-orange-500/50" />
-             <CyberCard img="/images/robotica.jpg" title="Automatización" subtitle="Industrial" tag="ROBOTIC" color="border-emerald-500/50" />
-             <CyberCard img="/images/galeria4.jpg" title="Smart Home" subtitle="Internet of Things" tag="IoT" color="border-purple-500/50" />
+             {galleryItems.length > 0 ? galleryItems.map((item) => (
+                <CyberCard 
+                    key={item.id}
+                    img={item.image} 
+                    title={item.title} 
+                    subtitle={item.subtitle}
+                    tag={item.tag} 
+                    color="border-cyan-500/50" 
+                />
+             )) : <p className="text-gray-500 col-span-4">Cargando portafolio...</p>}
           </div>
         </div>
       </section>
@@ -187,12 +226,10 @@ const Home = () => {
   );
 };
 
-// --- CYBER CARD (NUEVA TARJETA EXTRAVAGANTE) ---
 const CyberCard = ({ img, title, subtitle, tag, color }) => (
-  <div className="group relative h-[400px] rounded-2xl overflow-hidden cursor-pointer bg-black border border-white/10 hover:border-white/30 transition-all duration-500 shadow-lg hover:shadow-cyan-900/20">
+  <div className={`group relative h-[400px] rounded-2xl overflow-hidden cursor-pointer bg-black border border-white/10 hover:border-white/30 transition-all duration-500 shadow-lg hover:shadow-cyan-900/20`}>
     <img src={img} alt={title} className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-110 transition-all duration-700 grayscale group-hover:grayscale-0" />
     <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
-    {/* Borde Neón */}
     <div className={`absolute inset-0 border-2 ${color} opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-300 pointer-events-none shadow-[0_0_30px_rgba(0,0,0,0.5)]`}></div>
     <div className="absolute bottom-0 left-0 w-full p-6 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
       <div className="flex items-center justify-between mb-2">

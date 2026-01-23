@@ -110,7 +110,7 @@ const Robotics = () => {
     mouseX.set(clientX - left);
     mouseY.set(clientY - top);
   }
-  const backgroundCheck = useMotionTemplate`radial-gradient(600px circle at ${mouseX}px ${mouseY}px, rgba(16, 185, 129, 0.15), transparent 80%)`;
+  const backgroundCheck = useMotionTemplate`radial-gradient(600px circle at ${mouseX}px ${mouseY}px, rgba(16, 185, 129, 0.37), transparent 80%)`;
   const openWhatsapp = (topic) => window.open(`https://wa.me/51987564941?text=Hola InnovaLab, info sobre: ${topic}`, '_blank');
 
   return (
